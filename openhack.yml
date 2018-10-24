@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      name: tcp80
+      targetPort: 25565
+    - port: 443
+      name: ssl
+      protocol: TCP
+      targetPort: 25575
+    - port: 25565
+      name: http
+      targetPort: 25565
+    - port: 25575
+      name: https
+      targetPort: 25575
+  selector:
+    pod-name: minecraft
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecraft
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      pod-name: minecraft
+  template:
+    metadata:
+      labels:
+        pod-name: minecraft
+    spec:
+      hostname: minecraft
+      containers:
+        - name: minecraft
+          image: openhack/minecraft-server:1.0
+          ports:
+            - containerPort: 25565
+            - containerPort: 25575
+          env:
+            - name: "EULA"
+              value: "TRUE"
